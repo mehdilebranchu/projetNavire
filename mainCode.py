@@ -57,7 +57,7 @@ class operationSurLesFacettesEtLesNormales():
 
 
     def calculDePressionFacetteImergee(self, indice):
-        if self.__coodDeG[indice][2] < 0.5 :
+        if self.__coodDeG[indice][2] < 0.1 :
             rot = 1025
             g = 9.8
             pression = rot*g*self.__coodDeG[indice][2]
@@ -89,7 +89,7 @@ class operationSurLesFacettesEtLesNormales():
             for elt2 in range(0, 3):
                 self.__listeF[elt][elt2][-1] = self.__listeF[elt][elt2][-1] + x
         #print("affichage liste Facettes apres transalation : ")
-        print(self.__listeF)
+        #print(self.__listeF)
         return self.__listeF
     def poids(self):
         masse = 1000
@@ -112,15 +112,23 @@ class operationSurLesFacettesEtLesNormales():
             if i != 0.0:
                 n +=1
         return n
-    def calculHauteurImm(self):
-        listeZG = []
-        hauteurEau = 0.5
-        for i in lstCoordonneesDeG:
-            listeZG.append(i[2])
-        facetteLaPlusProfonde = min(listeZG)
+    def calculHauteurImm(self,borneInf, borneSup, epsilon):
+        listeZG = self.triZG()
+        lst = self.resolutionTirantDeau(borneInf, borneSup, epsilon)
+        print(lst[-2])
+        nbFacetteImm = int(abs(lst[-2]))
+        listeFImm = listeZG[:nbFacetteImm]
+        facetteLaPlusProfonde = min(listeFImm)
+        hauteurEau = 0.1
         hauteurImm = hauteurEau - facetteLaPlusProfonde
         return hauteurImm
-    def ConvertHauteurEnNbFacette(self,hauteurImm):
+
+    def triZG(self):
+        listeZG = []
+        for i in lstCoordonneesDeG:
+            listeZG.append(i[2])
+        listeZG.sort()
+        return listeZG
 
 
     def equationTirantDeau(self,hauteurImm):
@@ -136,12 +144,14 @@ class operationSurLesFacettesEtLesNormales():
             m = (debut+fin)/2
             if self.equationTirantDeau(m)*self.equationTirantDeau(borneInf)<0:
                 fin = m
+                self.translationDesFacette()
             else:
                 debut = m
                 ecart = fin-debut
+                self.translationDesFacette()
             lst1.append(m)
             n+=1
-        lst = [lst1,n]
+        lst = [lst1,m,n]
         return lst
 
 
@@ -173,7 +183,7 @@ print("nombre de facettes immergées :")
 print(objetSTL1.calculNbFacettesImm())
 
 print("le tirant d'eau est :")
-print(objetSTL1.resolutionTirantDeau(2,24,10**(-5)))
+print(objetSTL1.resolutionTirantDeau(1,12,10**(-5)))
 
 print("hauteurImm :")
-print(objetSTL1.calculHauteurImm())
+print(objetSTL1.calculHauteurImm(1,12,10**(-5)))
